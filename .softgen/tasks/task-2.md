@@ -1,6 +1,6 @@
 ---
 title: Build Search Interface and Results Display
-status: todo
+status: in_progress
 priority: high
 type: feature
 tags: [ui, search]
@@ -13,8 +13,8 @@ position: 2
 Core user interface: prominent search bar for country/zip input, results table with filtering/sorting, category badges, importance indicators.
 
 ## Checklist
-- [ ] Create SearchForm component: country + zip code inputs, submit button
-- [ ] Create ResultsTable component: sortable columns, category badges, filters
-- [ ] Create CategoryBadge component with cva variants
-- [ ] Update index.tsx with search interface layout
-- [ ] Add loading states and empty states
+- [x] Create SearchForm component: country + zip code inputs, submit button
+- [x] Create ResultsTable component: sortable columns, category badges, filters
+- [x] Create CategoryBadge component with cva variants
+- [x] Update index.tsx with search interface layout
+- [x] Add loading states and empty states
