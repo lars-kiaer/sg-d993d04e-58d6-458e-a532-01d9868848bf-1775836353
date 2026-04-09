@@ -14,8 +14,8 @@ Foundation setup: design system (colors, fonts) + database schema for news sourc
 
 ## Checklist
 - [x] Create .softgen/project.md
-- [ ] Convert hex colors to HSL via terminal
-- [ ] Update globals.css with design tokens
-- [ ] Update tailwind.config.ts with fonts
-- [ ] Create database schema (sources, searches, categories)
-- [ ] Apply RLS policies
+- [x] Convert hex colors to HSL via terminal
+- [x] Update globals.css with design tokens
+- [x] Update tailwind.config.ts with fonts
+- [x] Create database schema (sources, searches, categories)
+- [x] Apply RLS policies
