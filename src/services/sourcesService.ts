@@ -1,5 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
-import type { Tables } from "@/integrations/supabase/types";
+import type { Tables, TablesInsert, TablesUpdate } from "@/integrations/supabase/types";
 
 export type NewsSource = Tables<"news_sources">;
 export type SearchHistory = Tables<"search_history">;
@@ -18,7 +18,7 @@ export const sourcesService = {
     return data || [];
   },
 
-  async createSource(source: Partial<NewsSource>): Promise<NewsSource> {
+  async createSource(source: TablesInsert<"news_sources">): Promise<NewsSource> {
     const { data, error } = await supabase
       .from("news_sources")
       .insert(source)
@@ -30,7 +30,7 @@ export const sourcesService = {
     return data;
   },
 
-  async updateSource(id: string, updates: Partial<NewsSource>): Promise<NewsSource> {
+  async updateSource(id: string, updates: TablesUpdate<"news_sources">): Promise<NewsSource> {
     const { data, error } = await supabase
       .from("news_sources")
       .update(updates)
@@ -72,7 +72,7 @@ export const sourcesService = {
 
   async updateSearchHistory(
     id: string,
-    updates: Partial<SearchHistory>
+    updates: TablesUpdate<"search_history">
   ): Promise<SearchHistory> {
     const { data, error } = await supabase
       .from("search_history")
@@ -97,7 +97,7 @@ export const sourcesService = {
       query = query.eq("user_id", userId);
     }
 
-    const { data, error } = query;
+    const { data, error } = await query;
     console.log("Get search history:", { data, error });
     if (error) throw error;
     return data || [];
