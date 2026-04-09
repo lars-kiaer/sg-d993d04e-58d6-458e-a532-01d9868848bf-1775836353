@@ -30,10 +30,12 @@ export function ResultsTable({ sources }: ResultsTableProps) {
     if (searchTerm) {
       const term = searchTerm.toLowerCase();
       filtered = filtered.filter(
-        s =>
-          s.name.toLowerCase().includes(term) ||
-          s.description?.toLowerCase().includes(term) ||
-          s.topic_focus?.toLowerCase().includes(term)
+        s => {
+          const topicStr = Array.isArray(s.topic_focus) ? s.topic_focus.join(" ") : String(s.topic_focus || "");
+          return s.name.toLowerCase().includes(term) ||
+            s.description?.toLowerCase().includes(term) ||
+            topicStr.toLowerCase().includes(term);
+        }
       );
     }
 
@@ -52,8 +54,8 @@ export function ResultsTable({ sources }: ResultsTableProps) {
         aVal = a.community_importance || 0;
         bVal = b.community_importance || 0;
       } else if (sortField === "news_frequency") {
-        aVal = a.news_frequency || 0;
-        bVal = b.news_frequency || 0;
+        aVal = String(a.news_frequency || "").toLowerCase();
+        bVal = String(b.news_frequency || "").toLowerCase();
       }
 
       if (sortOrder === "asc") {
@@ -78,14 +80,6 @@ export function ResultsTable({ sources }: ResultsTableProps) {
     if (score >= 8) return <Badge className="bg-accent text-accent-foreground">High Impact</Badge>;
     if (score >= 5) return <Badge variant="secondary">Medium Impact</Badge>;
     return <Badge variant="outline">Low Impact</Badge>;
-  };
-
-  const getFrequencyText = (frequency: number | null) => {
-    if (!frequency) return "Unknown";
-    if (frequency >= 20) return "Daily+";
-    if (frequency >= 7) return "Weekly+";
-    if (frequency >= 1) return "Monthly+";
-    return "Occasional";
   };
 
   if (sources.length === 0) {
@@ -170,8 +164,10 @@ export function ResultsTable({ sources }: ResultsTableProps) {
                   </CategoryBadge>
                 </TableCell>
                 <TableCell>
-                  {source.topic_focus ? (
-                    <span className="text-sm">{source.topic_focus}</span>
+                  {source.topic_focus && source.topic_focus.length > 0 ? (
+                    <span className="text-sm">
+                      {Array.isArray(source.topic_focus) ? source.topic_focus.join(", ") : String(source.topic_focus)}
+                    </span>
                   ) : (
                     <span className="text-sm text-muted-foreground">General</span>
                   )}
@@ -185,7 +181,7 @@ export function ResultsTable({ sources }: ResultsTableProps) {
                   </div>
                 </TableCell>
                 <TableCell>
-                  <span className="text-sm">{getFrequencyText(source.news_frequency)}</span>
+                  <span className="text-sm capitalize">{source.news_frequency || "Unknown"}</span>
                 </TableCell>
                 <TableCell className="text-right">
                   {source.url && (
