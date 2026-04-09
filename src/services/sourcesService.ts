@@ -1,8 +1,13 @@
 import { supabase } from "@/integrations/supabase/client";
-import type { Tables, TablesInsert, TablesUpdate } from "@/integrations/supabase/types";
+import type { Database } from "@/integrations/supabase/types";
 
-export type NewsSource = Tables<"news_sources">;
-export type SearchHistory = Tables<"search_history">;
+export type NewsSource = Database["public"]["Tables"]["news_sources"]["Row"];
+export type NewsSourceInsert = Database["public"]["Tables"]["news_sources"]["Insert"];
+export type NewsSourceUpdate = Database["public"]["Tables"]["news_sources"]["Update"];
+
+export type SearchHistory = Database["public"]["Tables"]["search_history"]["Row"];
+export type SearchHistoryInsert = Database["public"]["Tables"]["search_history"]["Insert"];
+export type SearchHistoryUpdate = Database["public"]["Tables"]["search_history"]["Update"];
 
 export const sourcesService = {
   async getSourcesByLocation(country: string, zipCode: string): Promise<NewsSource[]> {
@@ -18,7 +23,7 @@ export const sourcesService = {
     return data || [];
   },
 
-  async createSource(source: TablesInsert<"news_sources">): Promise<NewsSource> {
+  async createSource(source: NewsSourceInsert): Promise<NewsSource> {
     const { data, error } = await supabase
       .from("news_sources")
       .insert(source)
@@ -30,7 +35,7 @@ export const sourcesService = {
     return data;
   },
 
-  async updateSource(id: string, updates: TablesUpdate<"news_sources">): Promise<NewsSource> {
+  async updateSource(id: string, updates: NewsSourceUpdate): Promise<NewsSource> {
     const { data, error } = await supabase
       .from("news_sources")
       .update(updates)
@@ -72,7 +77,7 @@ export const sourcesService = {
 
   async updateSearchHistory(
     id: string,
-    updates: TablesUpdate<"search_history">
+    updates: SearchHistoryUpdate
   ): Promise<SearchHistory> {
     const { data, error } = await supabase
       .from("search_history")
