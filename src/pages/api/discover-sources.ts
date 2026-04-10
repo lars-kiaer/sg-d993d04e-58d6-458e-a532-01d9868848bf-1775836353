@@ -93,12 +93,13 @@ export default async function handler(
       search_id: searchRecord.id,
       name: source.name,
       url: source.url,
-      category: source.category,
+      source_type: source.category,
       topic_focus: source.topic_focus,
       community_importance: source.community_importance,
       news_frequency: source.news_frequency,
       description: source.description,
-      location: source.location,
+      country: country,
+      zip_code: zipCode,
     }));
 
     const { data: insertedSources, error: insertError } = await supabase
