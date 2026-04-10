@@ -6,12 +6,12 @@ interface SearchResult {
 }
 
 interface PlaceResult {
-  name: string;
-  formatted_address?: string;
-  website?: string;
+  displayName?: { text: string };
+  formattedAddress?: string;
+  websiteUri?: string;
   types?: string[];
   rating?: number;
-  user_ratings_total?: number;
+  userRatingCount?: number;
 }
 
 interface DiscoveredSource {
@@ -89,7 +89,7 @@ export const crawlerService = {
   },
 
   /**
-   * Search Google Places for local organizations that might publish news
+   * Search Google Places API (New) for local organizations that might publish news
    */
   async searchPlaces(country: string, zipCode: string): Promise<DiscoveredSource[]> {
     const apiKey = process.env.GOOGLE_PLACES_API_KEY;
@@ -100,47 +100,58 @@ export const crawlerService = {
     }
 
     const placeTypes = [
-      "city_hall",
-      "local_government_office",
-      "school",
-      "university",
-      "library",
-      "community_center",
-      "chamber_of_commerce",
+      { type: "city_hall", description: "city hall" },
+      { type: "local_government_office", description: "government office" },
+      { type: "school", description: "school" },
+      { type: "university", description: "university" },
+      { type: "library", description: "library" },
+      { type: "community_center", description: "community center" },
     ];
 
     const allResults: DiscoveredSource[] = [];
 
-    for (const type of placeTypes) {
-      const url = new URL("https://maps.googleapis.com/maps/api/place/textsearch/json");
-      url.searchParams.set("key", apiKey);
-      url.searchParams.set("query", `${type} ${zipCode} ${country}`);
+    for (const { type, description } of placeTypes) {
+      const url = "https://places.googleapis.com/v1/places:searchText";
 
       try {
-        console.log(`Searching Places for: "${type} ${zipCode}"`);
-        const response = await fetch(url.toString());
+        console.log(`Searching Places (New API) for: "${type} ${zipCode}"`);
+        const response = await fetch(url, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-Goog-Api-Key": apiKey,
+            "X-Goog-FieldMask": "places.displayName,places.formattedAddress,places.websiteUri,places.types",
+          },
+          body: JSON.stringify({
+            textQuery: `${description} ${zipCode} ${country}`,
+            maxResultCount: 10,
+          }),
+        });
+
         const data = await response.json();
 
         console.log(`Places response status: ${response.status}`);
         console.log(`Places response for "${type}":`, JSON.stringify(data, null, 2));
 
-        if (!response.ok || data.status !== "OK") {
+        if (!response.ok) {
           console.error(`Places API error for "${type}":`, data);
           continue;
         }
 
-        if (data.results) {
-          const sources = data.results
-            .filter((place: PlaceResult) => place.website)
+        if (data.places) {
+          const sources = data.places
+            .filter((place: PlaceResult) => place.websiteUri)
             .map((place: PlaceResult) => ({
-              name: place.name,
-              url: place.website || "",
-              description: `${type.replace(/_/g, " ")} in ${place.formatted_address || zipCode}`,
+              name: place.displayName?.text || "Unknown",
+              url: place.websiteUri || "",
+              description: `${description} in ${place.formattedAddress || zipCode}`,
               sourceType: type,
-              location: place.formatted_address || `${zipCode}, ${country}`,
+              location: place.formattedAddress || `${zipCode}, ${country}`,
             }));
           console.log(`Found ${sources.length} places with websites for "${type}"`);
           allResults.push(...sources);
+        } else {
+          console.log(`No places found for "${type}"`);
         }
       } catch (error) {
         console.error(`Places search error for type "${type}":`, error);
