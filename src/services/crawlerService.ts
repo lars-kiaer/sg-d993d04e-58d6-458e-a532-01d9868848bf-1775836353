@@ -31,6 +31,9 @@ export const crawlerService = {
     const engineId = process.env.GOOGLE_CUSTOM_SEARCH_ENGINE_ID;
 
     if (!apiKey || !engineId) {
+      console.error("Google Custom Search API credentials not configured");
+      console.error("API Key present:", !!apiKey);
+      console.error("Engine ID present:", !!engineId);
       throw new Error("Google Custom Search API credentials not configured");
     }
 
@@ -51,8 +54,17 @@ export const crawlerService = {
       url.searchParams.set("num", "10");
 
       try {
+        console.log(`Executing search query: "${query}"`);
         const response = await fetch(url.toString());
         const data = await response.json();
+
+        console.log(`Search response status: ${response.status}`);
+        console.log(`Search response data:`, JSON.stringify(data, null, 2));
+
+        if (!response.ok) {
+          console.error(`Search API error for "${query}":`, data);
+          continue;
+        }
 
         if (data.items) {
           const sources = data.items.map((item: SearchResult) => ({
@@ -62,13 +74,17 @@ export const crawlerService = {
             sourceType: "web_search",
             location: `${zipCode}, ${country}`,
           }));
+          console.log(`Found ${sources.length} sources for query "${query}"`);
           allResults.push(...sources);
+        } else {
+          console.log(`No items found for query "${query}"`);
         }
       } catch (error) {
         console.error(`Search error for query "${query}":`, error);
       }
     }
 
+    console.log(`Total web sources found: ${allResults.length}`);
     return allResults;
   },
 
@@ -79,6 +95,7 @@ export const crawlerService = {
     const apiKey = process.env.GOOGLE_PLACES_API_KEY;
 
     if (!apiKey) {
+      console.error("Google Places API key not configured");
       throw new Error("Google Places API key not configured");
     }
 
@@ -100,8 +117,17 @@ export const crawlerService = {
       url.searchParams.set("query", `${type} ${zipCode} ${country}`);
 
       try {
+        console.log(`Searching Places for: "${type} ${zipCode}"`);
         const response = await fetch(url.toString());
         const data = await response.json();
+
+        console.log(`Places response status: ${response.status}`);
+        console.log(`Places response for "${type}":`, JSON.stringify(data, null, 2));
+
+        if (!response.ok || data.status !== "OK") {
+          console.error(`Places API error for "${type}":`, data);
+          continue;
+        }
 
         if (data.results) {
           const sources = data.results
@@ -113,6 +139,7 @@ export const crawlerService = {
               sourceType: type,
               location: place.formatted_address || `${zipCode}, ${country}`,
             }));
+          console.log(`Found ${sources.length} places with websites for "${type}"`);
           allResults.push(...sources);
         }
       } catch (error) {
@@ -120,6 +147,7 @@ export const crawlerService = {
       }
     }
 
+    console.log(`Total place sources found: ${allResults.length}`);
     return allResults;
   },
 
