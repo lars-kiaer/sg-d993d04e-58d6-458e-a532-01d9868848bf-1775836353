@@ -26,6 +26,7 @@ export type Database = {
           last_crawled_at: string | null
           name: string
           news_frequency: string | null
+          search_id: string | null
           source_type: string
           topic_focus: string[] | null
           updated_at: string | null
@@ -42,6 +43,7 @@ export type Database = {
           last_crawled_at?: string | null
           name: string
           news_frequency?: string | null
+          search_id?: string | null
           source_type: string
           topic_focus?: string[] | null
           updated_at?: string | null
@@ -58,13 +60,22 @@ export type Database = {
           last_crawled_at?: string | null
           name?: string
           news_frequency?: string | null
+          search_id?: string | null
           source_type?: string
           topic_focus?: string[] | null
           updated_at?: string | null
           url?: string
           zip_code?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "news_sources_search_id_fkey"
+            columns: ["search_id"]
+            isOneToOne: false
+            referencedRelation: "search_history"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
         Row: {

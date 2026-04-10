@@ -1,0 +1,1 @@
+ALTER TABLE news_sources ADD COLUMN search_id UUID REFERENCES search_history(id) ON DELETE SET NULL;
