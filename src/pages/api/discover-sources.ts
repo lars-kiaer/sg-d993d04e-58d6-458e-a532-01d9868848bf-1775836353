@@ -39,7 +39,7 @@ export default async function handler(
       .insert({
         country,
         zip_code: zipCode,
-        status: "processing",
+        status: "in_progress",
       })
       .select()
       .single();
